@@ -22,9 +22,9 @@ func onlyZeroes(s []int64) bool {
 	return true
 }
 
-func extrapolate(readings []int64) int64 {
+func extrapolate(readings []int64) (int64, int64) {
 	if onlyZeroes(readings) {
-		return 0
+		return 0, 0
 	}
 
 	deltas := []int64{}
@@ -32,10 +32,12 @@ func extrapolate(readings []int64) int64 {
 		deltas = append(deltas, readings[i]-readings[i-1])
 	}
 
-	return readings[len(readings)-1] + extrapolate(deltas)
+	h, f := extrapolate(deltas)
+
+	return readings[0] - h, readings[len(readings)-1] + f
 }
 
-func parseLine(line string, ex2 bool) int64 {
+func parseLine(line string) (int64, int64) {
 	tmp := strings.Split(line, " ")
 	readings := make([]int64, len(tmp))
 	for i, n := range tmp {
@@ -57,9 +59,12 @@ func main() {
 
 	scanner.Split(bufio.ScanLines)
 
-	s := int64(0)
+	h := int64(0)
+	f := int64(0)
 	for scanner.Scan() {
-		s += parseLine(scanner.Text(), true)
+		lh, lf := parseLine(scanner.Text())
+		h += lh
+		f += lf
 	}
-	fmt.Println(s)
+	fmt.Println(h, f)
 }
