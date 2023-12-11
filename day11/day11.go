@@ -8,6 +8,13 @@ import (
 	"strings"
 )
 
+func abs(x int64) int64 {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
 type galaxy struct {
 	X int64
 	Y int64
@@ -20,11 +27,11 @@ func newGalaxy(x, y int64) *galaxy {
 	}
 }
 
-func (g *galaxy) minDist(g2 *galaxy) int64 {
-	return g.X - g2.X + g.Y - g2.Y
+func (g *galaxy) MinDist(g2 *galaxy) int64 {
+	return abs(g.X-g2.X) + abs(g.Y-g2.Y)
 }
 
-func parseLines(lines []string, ex2 bool) int64 {
+func parseLines(lines []string, expansion int64) int64 {
 	lineLen := 0
 	galaxies := []*galaxy{}
 	rowsGalaxies := map[int64]int64{}
@@ -56,11 +63,34 @@ func parseLines(lines []string, ex2 bool) int64 {
 	sort.Slice(rowsToExpend, func(i, j int) bool { return rowsToExpend[i] < rowsToExpend[j] })
 	sort.Slice(columnsToExpend, func(i, j int) bool { return columnsToExpend[i] < columnsToExpend[j] })
 
-	return 0
+	for i, row := range rowsToExpend {
+		for _, gal := range galaxies {
+			if gal.X >= row+int64(i)*expansion {
+				gal.X += int64(expansion)
+			}
+		}
+	}
+
+	for i, col := range columnsToExpend {
+		for _, gal := range galaxies {
+			if gal.Y >= col+int64(i)*expansion {
+				gal.Y += int64(expansion)
+			}
+		}
+	}
+
+	total := int64(0)
+	for i := 0; i < len(galaxies)-1; i++ {
+		for j := i + 1; j < len(galaxies); j++ {
+			total += galaxies[i].MinDist(galaxies[j])
+		}
+	}
+
+	return total
 }
 
 func main() {
-	file, err := os.Open("day11/test.txt")
+	file, err := os.Open("day11/in.txt")
 	defer file.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -74,5 +104,5 @@ func main() {
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
-	fmt.Println(parseLines(lines, false))
+	fmt.Println(parseLines(lines, 999999))
 }
