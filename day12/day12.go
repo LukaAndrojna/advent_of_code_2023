@@ -48,7 +48,7 @@ func countConf(condition string, plan []int64) int64 {
 	}
 	if condition[0] == '#' || condition[0] == '?' {
 		if plan[0] <= int64(len(condition)) &&
-		!strings.Contains(condition[:plan[0]], ".") {
+			!strings.Contains(condition[:plan[0]], ".") {
 			if plan[0] == int64(len(condition)) {
 				num += countConf(condition[plan[0]:], plan[1:])
 			} else if condition[plan[0]] != '#' {

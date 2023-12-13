@@ -141,17 +141,95 @@ func traversePipes(grid [][]string, x int, y int) int {
 		yPrev = y
 		x = xTmp
 		y = yTmp
-		
+
 		pathLen++
 	}
-	if pathLen % 2 == 0 {
+	if pathLen%2 == 0 {
 		return pathLen / 2
 	}
-	return pathLen / 2 + 1
+	return pathLen/2 + 1
+}
+
+func addBorder(grid [][]string) [][]string {
+	for i, row := range grid {
+		grid[i] = append(append([]string{"."}, row...), ".")
+	}
+
+	grid = append([][]string{strings.Split(
+		strings.Repeat(".", len(grid[0])), "")}, grid...)
+	grid = append(grid, strings.Split(
+		strings.Repeat(".", len(grid[0])), ""))
+	return grid
+}
+
+func expandRow(row []string) []string {
+	expandedRow := []string{}
+	for i, s := range row {
+		expandedRow = append(expandedRow, s)
+		if i < len(row)-1 {
+			if considerRight(s) && considerLeft(row[i+1]) {
+				expandedRow = append(expandedRow, "-")
+			} else {
+				expandedRow = append(expandedRow, "o")
+			}
+
+		}
+	}
+	return expandedRow
+}
+
+func expandGrid(grid [][]string, expandCols bool) [][]string {
+	expandedGrid := [][]string{}
+	
+	for i, row := range grid {
+		expandedGrid = append(expandedGrid, expandRow(row))
+		if expandCols && i < len(grid)-1 {
+			newRow := []string{}
+			for j := range row {
+				if considerDown(row[j]) && considerUp(grid[i+1][j]) {
+					newRow = append(newRow, "|")
+				} else {
+					newRow = append(newRow, "o")
+				}
+			}
+		}
+	}
+
+	return expandedGrid
+}
+
+func floodFill(grid *[][]string, i, j int) {
+	(*grid)[i][j] = "x"
+	if (*grid)[i][j] == "x" {
+		if i > 0 && ((*grid)[i-1][j] == "." || (*grid)[i-1][j] == "o") {
+			floodFill(grid, i-1, j)
+		}
+		if j > 0 && ((*grid)[i][j-1] == "." || (*grid)[i][j-1] == "o") {
+			floodFill(grid, i, j-1)
+		}
+		if i < len(*grid)-1 && ((*grid)[i+1][j] == "." || (*grid)[i+1][j] == "o") {
+			floodFill(grid, i+1, j)
+		}
+		if j < len((*grid)[i])-1 && ((*grid)[i][j+1] == "." || (*grid)[i][j+1] == "o") {
+			floodFill(grid, i, j+1)
+		}
+	}
+}
+
+func countTiles(grid [][]string) int {
+	num := 0
+	for _, row := range grid {
+		for _, col := range row {
+			if col == "." {
+				num++
+			}
+		}
+	}
+	return num
 }
 
 func main() {
-	file, err := os.Open("day10/in.txt")
+	file, err := os.Open("day10/test2.txt")
 	defer file.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -167,4 +245,8 @@ func main() {
 	}
 	grid, x, y := makeGrid(lines, false)
 	fmt.Println(traversePipes(grid, x, y))
+	grid = expandGrid(addBorder(grid), false)
+	floodFill(&grid, 0, 0)
+
+	fmt.Println(countTiles(grid))
 }
