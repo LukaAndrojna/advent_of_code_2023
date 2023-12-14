@@ -38,14 +38,11 @@ func findRelfections(pattern []string) int {
 
 	for i, row := range pattern {
 		for j := range row {
-			if j > 0 && j < len(row)-1 && isPalindrome(row, j) {
+			if j < len(row)-1 && isPalindrome(row, j) {
 				vertRef[1+j]++
 			}
 		}
-		if i == len(row)-1 {
-			break
-		}
-		if i > 0 && i < len(pattern)-1 && horizontalMatch(pattern, i) {
+		if i < len(pattern)-1 && horizontalMatch(pattern, i) {
 			horRef[1+i]++
 		}
 	}
