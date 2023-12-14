@@ -14,8 +14,20 @@ func min(x, y int) int {
 	return y
 }
 
-func tilt(lines [][]string) int {
-	n := 0
+func turn(lines [][]string) [][]string {
+	turnedLines := [][]string{}
+	for i := range lines {
+		for j := range lines[i] {
+			if i == 0 {
+				turnedLines = append(turnedLines, []string{})
+			}
+			turnedLines[j] = append([]string{lines[i][j]}, turnedLines[j]...)
+		}
+	}
+	return turnedLines
+}
+
+func tilt(lines [][]string) [][]string {
 	for i := range lines {
 		if i == 0 {
 			continue
@@ -35,6 +47,12 @@ func tilt(lines [][]string) int {
 			}
 		}
 	}
+	return lines
+}
+
+func score(lines [][]string) int {
+	n := 0
+
 	for i, line := range lines {
 		for _, char := range line {
 			if char == "O" {
@@ -61,5 +79,11 @@ func main() {
 	for scanner.Scan() {
 		lines = append(lines, strings.Split(scanner.Text(), ""))
 	}
-	fmt.Println(tilt(lines))
+
+	fmt.Println(score(tilt(lines)))
+
+	for i := 0; i < 4000; i++ {
+		lines = turn(tilt(lines))
+	}
+	fmt.Println(score(lines))
 }
